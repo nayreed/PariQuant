@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nayreed/PariQuant/schemas/context_record.schema.json",
+  "title": "PariQuant execution-context record",
+  "description": "Provider-reported calibration/characterization context for one run, with provenance. This is execution context, not a model of the full physical noise channel. Missing values are 'unavailable' and are never imputed.",
+  "type": "object",
+  "required": ["provider", "backend_id", "task_or_job_id", "execution_start", "execution_end", "snapshots", "fields"],
+  "additionalProperties": false,
+  "properties": {
+    "provider": { "type": "string" },
+    "backend_id": { "type": "string" },
+    "task_or_job_id": { "type": "string" },
+    "execution_start": { "type": ["string", "null"], "format": "date-time" },
+    "execution_end": { "type": ["string", "null"], "format": "date-time" },
+    "snapshots": {
+      "type": "array",
+      "description": "Job-linked runs may have one; Braket runs archive a pre- and a post-execution snapshot.",
+      "items": {
+        "type": "object",
+        "required": ["retrieval_time", "source_api", "raw_payload_hash", "raw_payload_location"],
+        "additionalProperties": false,
+        "properties": {
+          "retrieval_time": { "type": "string", "format": "date-time" },
+          "source_api": { "type": "string" },
+          "provider_updated_at": { "type": "string" },
+          "calibration_or_characterization_id": { "type": "string" },
+          "raw_payload_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "raw_payload_location": { "type": "string" }
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/field" }
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "required": ["name", "scope", "evidence_status"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "scope": { "enum": ["device", "qubit", "qubit-pair", "operation"] },
+        "value": {},
+        "unit": { "type": "string" },
+        "uncertainty": { "type": "number", "minimum": 0 },
+        "characterization_method": { "type": "string" },
+        "evidence_status": { "enum": ["observed", "derived", "unavailable"] },
+        "provenance_kind": {
+          "enum": ["job-linked", "calibration-set-linked", "near-run-current", "static-provider", "researcher-measured"]
+        },
+        "derivation": { "type": "string", "description": "Equation/model and version; derived fields only." },
+        "source_note": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "evidence_status": { "const": "unavailable" } }, "required": ["evidence_status"] },
+          "then": { "not": { "required": ["value"] } },
+          "else": { "required": ["value", "provenance_kind"] }
+        },
+        {
+          "if": { "properties": { "evidence_status": { "const": "derived" } }, "required": ["evidence_status"] },
+          "then": { "required": ["derivation"] },
+          "else": { "not": { "required": ["derivation"] } }
+        }
+      ]
+    }
+  }
+}
