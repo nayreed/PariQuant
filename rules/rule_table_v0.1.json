@@ -1,0 +1,75 @@
+{
+  "version": "0.1-draft",
+  "status": "draft",
+  "notes": [
+    "Researcher-defined first version (docs/proposal/PariQuant.md, Sec. 4.3). No tolerance below has been chosen: numerical tolerances are set from the pilot partition only, then the table is frozen (status 'frozen', version bumped) before any held-out evaluation.",
+    "Which descriptors are 'required' is a proposal pending agreement with the supervisors; supplementary descriptors never enter the overall decision.",
+    "Native operation counts of different gate families are not comparable by default: a cross-technology comparison of these descriptors needs a stated justification in 'applicability' before the role is 'required' for such pairs."
+  ],
+  "sensitivity_multipliers": [0.5, 1.0, 2.0],
+  "rules": [
+    {
+      "name": "occupied_physical_qubits",
+      "definition": "Number of distinct physical qubits (including ancillas) that carry at least one operation or measurement in the compiled program; unused wires of a full-device representation are not counted.",
+      "unit": "qubits",
+      "role": "required",
+      "comparison": "exact",
+      "tolerance": null,
+      "applicability": "All four QPUs."
+    },
+    {
+      "name": "native_two_qubit_operations",
+      "definition": "Count of native two-qubit operations in the submitted native program (CZ, RZZ, RXX/MS, ZZ ...), including operations attributable to routing.",
+      "unit": "operations",
+      "role": "required",
+      "comparison": "numerical",
+      "tolerance": null,
+      "applicability": "Within a technology. Across technologies only with a justified interaction-equivalence descriptor (e.g. canonical nonlocal content); not assumed."
+    },
+    {
+      "name": "native_one_qubit_operations",
+      "definition": "Count of native one-qubit operations in the submitted native program.",
+      "unit": "operations",
+      "role": "supplementary",
+      "comparison": "numerical",
+      "tolerance": null,
+      "applicability": "Within a technology."
+    },
+    {
+      "name": "routing_attributed_two_qubit_operations",
+      "definition": "Subset of native_two_qubit_operations attributed to routing/transport (attribution only, never charged twice).",
+      "unit": "operations",
+      "role": "supplementary",
+      "comparison": "numerical",
+      "tolerance": null,
+      "applicability": "Where routing is observable in the compiled program."
+    },
+    {
+      "name": "scheduled_duration",
+      "definition": "Scheduled circuit duration from the provider/compiler schedule, where exposed.",
+      "unit": "s",
+      "role": "required",
+      "comparison": "numerical",
+      "tolerance": null,
+      "applicability": "Only where a schedule or operation durations are observable; otherwise 'insufficient'."
+    },
+    {
+      "name": "requested_shots",
+      "definition": "Requested sampling budget per circuit (an experiment setting; see pariquant.shots).",
+      "unit": "shots",
+      "role": "required",
+      "comparison": "exact",
+      "tolerance": null,
+      "applicability": "All; held equal by design unless varied as a controlled resource."
+    },
+    {
+      "name": "calibration_context_fields",
+      "definition": "Provider-reported calibration/characterization fields (T1/T2, gate and readout errors, durations). Execution context only.",
+      "unit": "various",
+      "role": "supplementary",
+      "comparison": "numerical",
+      "tolerance": null,
+      "applicability": "Only like-for-like fields of equal scope and characterization method; static or literature values are never matched against measured ones."
+    }
+  ]
+}
